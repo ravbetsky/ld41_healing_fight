@@ -1,8 +1,7 @@
 {
-  "name": "Phaser3ES6Webpack",
-  "version": "1.0.0",
+  "name": "ld41_healing_light",
+  "version": "0.0.1",
   "description": "",
-  "author": "niklas berg <me@niklasberg.se>",
   "main": "index.js",
   "scripts": {
     "dev": "webpack",
@@ -32,7 +31,7 @@
     "html-webpack-plugin": "^2.30.1"
   },
   "dependencies": {
-    "phaser": "3.3.0",
+    "phaser": "3.6.0",
     "phaser-animated-tiles": "^1.0.0"
   }
 }

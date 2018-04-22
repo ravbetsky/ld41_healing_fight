@@ -3,3 +3,7 @@ export const centerGameObjects = (objects) => {
     object.anchor.setTo(0.5)
   })
 }
+
+export const timeout = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

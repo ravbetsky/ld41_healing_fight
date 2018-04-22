@@ -1,25 +1,36 @@
 /* globals __DEV__ */
 import Phaser from 'phaser'
+import Enemy from '../sprites/Enemy'
 import Player from '../sprites/Player'
+import AI from '../sprites/AI'
 
 export default class extends Phaser.State {
-  init () {}
-  preload () {}
+  init() {}
+  preload() {}
 
-  create () {
-
+  create() {
     this.game.physics.startSystem(Phaser.Physics.ARCADE)
+
+    this.enemy = new Enemy({
+      game: this.game,
+      x: 0,
+      y: 300,
+      asset: 'player',
+      frame: 0,
+      AI: new AI(),
+    })
 
     this.player = new Player({
       game: this.game,
-      x: this.world.centerX,
-      y: this.world.centerY,
+      x: game.world.centerX,
+      y: game.world.centerY,
       asset: 'player',
-      frame: 0
+      frame: 0,
     })
 
-    let bg = game.add.tileSprite(0, 0, 512, 384, 'bg');
-    bg.fixedToCamera = true;
+    // const bg = game.add.tileSprite(0, 0, 512, 384, 'bg');
+
+    // bg.fixedToCamera = true;
 
     this.map = this.game.add.tilemap('map')
 
@@ -29,8 +40,11 @@ export default class extends Phaser.State {
 
     this.layer.resizeWorld()
 
+    window.layer = this.layer;
+
     this.map.setCollisionBetween(1, 12)
 
+    // Player
     this.game.add.existing(this.player)
 
     this.game.camera.follow(this.player);
@@ -38,40 +52,44 @@ export default class extends Phaser.State {
     this.game.physics.enable(this.player, Phaser.Physics.ARCADE);
 
     this.player.body.gravity.y = 760;
-    
-    this.weapon = game.add.weapon(30, 'bullet');
-    
-    //  The bullet will be automatically killed when it leaves the world bounds
-    this.weapon.bulletKillType = Phaser.Weapon.KILL_WORLD_BOUNDS;
 
-    //  Because our bullet is drawn facing up, we need to offset its rotation:
-    this.weapon.bulletAngleOffset = 180;
-    
-    this.weapon.fireAngle = 0; 
+    this.player.body.collideWorldBounds = true;
 
-    //  The speed at which the bullet is fired
-    this.weapon.bulletSpeed = 800;
+    // Enemy
+    this.game.add.existing(this.enemy)
 
-    //  Speed-up the rate of fire, allowing them to shoot 1 bullet every 60ms
-    this.weapon.fireRate = 200;
-    
-    this.fireButton = game.input.keyboard.addKey(Phaser.KeyCode.SPACEBAR);
-    
-    this.weapon.trackSprite(this.player, 28, 22);
-    
-    this.player.weapon = this.weapon
+    this.game.physics.enable(this.enemy, Phaser.Physics.ARCADE);
 
+    this.enemy.body.gravity.y = 760;
+
+    this.enemy.body.collideWorldBounds = true;
+
+    // game.input.onDown.add(() => {
+    //   const playerPosition = { x: this.player.position.x, y: this.player.position.y };
+    //   this.enemy.setTarget(playerPosition);
+    // }, this);
+
+    window.enemy = this.enemy;
   }
 
   update() {
-    this.game.physics.arcade.collide(this.player, this.layer)
-    
-    if (this.fireButton.isDown) {
-      this.weapon.fire()
+    this.game.physics.arcade.collide(this.enemy, this.layer);
+    this.game.physics.arcade.collide(this.player, this.layer);
+    // this.game.physics.arcade.collide(this.enemy, this.player);
+
+    const playerPosition = { x: this.player.position.x, y: this.player.position.y };
+    this.enemy.setTarget(playerPosition);
+
+    // Enemy
+    this.enemy.raycast.attachRays()
+    const raycastResult = this.enemy.raycast.raycast(this.layer);
+    if (this.enemy.hasTarget()) {
+      this.enemy.manageMoves(raycastResult)
     }
   }
 
   render () {
-    this.weapon.debug();
+    this.enemy.raycast.debug()
+    // game.debug.spriteInfo(this.enemy, 32, 32);
   }
 }
